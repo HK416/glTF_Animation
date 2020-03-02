@@ -122,11 +122,13 @@ int main(int argc, char* argv[])
     Model model(argv[1]);
     model.SetupModel();
 
-    unsigned int shader_program;
+    Shader* curr_shader = nullptr;
+    Shader def_shader("./GLSL/vert_default.glsl", "./GLSL/frag.glsl");
+    Shader anim_shader("./GLSL/vert_animation.glsl", "./GLSL/frag.glsl");
     if(model.IsAnimated() == true)
-        shader_program = CreateShaderProgram("./GLSL/vert_animation.glsl", "./GLSL/frag.glsl");
+        curr_shader = &anim_shader;
     else
-        shader_program = CreateShaderProgram("./GLSL/vert_default.glsl", "./GLSL/frag.glsl");
+        curr_shader = &def_shader;
 
     /* render loop */
     float prev_time = glfwGetTime();
@@ -149,18 +151,16 @@ int main(int argc, char* argv[])
             glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
-            glUseProgram(shader_program);
-            glUniformMatrix4fv(glGetUniformLocation(shader_program, "projection"), 1, GL_FALSE, camera.GetProjectionMatrix());
-            glUniformMatrix4fv(glGetUniformLocation(shader_program, "view"), 1, GL_FALSE, camera.GetViewMatrix());
-            model.Render(shader_program);
+            glUseProgram(curr_shader->get());
+            glUniformMatrix4fv(glGetUniformLocation(curr_shader->get(), "projection"), 1, GL_FALSE, camera.GetProjectionMatrix());
+            glUniformMatrix4fv(glGetUniformLocation(curr_shader->get(), "view"), 1, GL_FALSE, camera.GetViewMatrix());
+            model.Render(curr_shader->get());
             
             glfwSwapBuffers(glfw_window);
         }
     }
 
     model.CleanupModel();
-    DeleteShaderProgram(shader_program);
-
 
     /* destroy GLFW instance */
     glfwDestroyWindow(glfw_window);
