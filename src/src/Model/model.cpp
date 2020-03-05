@@ -773,7 +773,8 @@ Material LoadglTFMaterial(const tinygltf::Model& gltf_model, const tinygltf::Mat
 
 /* constructor */
 Model::Model(const std::string& directory, const std::string& filename)
-    : directory(directory)
+    : curr_animation(0)
+    , directory(directory)
     , filename(filename)
     , meshes()
     , nodes()
@@ -781,24 +782,13 @@ Model::Model(const std::string& directory, const std::string& filename)
     , animations()
 {
     LoadModel(directory + '/' + filename);
-}
-
-/* constructor */
-Model::Model(const std::string& filename)
-    : directory(".")
-    , filename(filename)
-    , meshes()
-    , nodes()
-    , skins()
-    , animations()
-    , textures()
-{
-    LoadModel(filename);
+    SetupModel();
 }
 
 /* copy constructor */
 Model::Model(const Model& other)
-    : directory(other.directory)
+    : curr_animation(other.curr_animation)
+    , directory(other.directory)
     , filename(other.filename)
     , meshes(other.meshes)
     , nodes(other.nodes)
@@ -806,6 +796,12 @@ Model::Model(const Model& other)
     , animations(other.animations)
     , textures(other.textures)
 { /* empty */ }
+
+/* destructor */
+Model::~Model()
+{
+    CleanupModel();
+}
 
 /* function that does initial work so that the model can be used */
 void Model::SetupModel()
@@ -829,15 +825,15 @@ void Model::CleanupModel()
 
 /* function to update the state of the model */
 /* (mainly update animation)                 */
-void Model::Update(float delta_time)
+void Model::Update(double delta_time)
 {
-    static float total_time = 0.0f;
+    static double total_time = 0.0f;
     total_time += delta_time;
 
     if(animations.size() > 0)
     {
         /* NOTE: only the first animation is used */
-        UpdateAnimation(0, total_time);
+        UpdateAnimation(total_time);
     }
 }
 
@@ -864,6 +860,11 @@ void Model::Render(unsigned int shader_program)
 bool Model::IsAnimated() const
 {
     return (animations.size() > 0 && skins.size() > 0);
+}
+
+void Model::ChangeAnimation(int num)
+{
+    curr_animation = std::clamp<size_t>(curr_animation + num, 0, animations.size() - 1);
 }
 
 /* load a file in glTF format */
@@ -934,16 +935,16 @@ orca::mat4<float> Model::GetNodeMatrix(int node_id)
 }
 
 /* function to update the animation of the model */
-void Model::UpdateAnimation(unsigned int animation_id, float duration)
+void Model::UpdateAnimation(double duration)
 {
-    if(animation_id >= animations.size())
+    if (curr_animation >= animations.size())   
         throw std::runtime_error("animation id error: out of range.");
 
     bool updated = false;
-    Animation& animation = animations[animation_id];
-    float time = std::fmod(duration, animation.end_time - animation.start_time);
+    Animation& animation = animations[curr_animation];
+    float time = std::fmod(static_cast<float>(duration), animation.end_time - animation.start_time);
 
-    for(auto& channel : animation.channels)
+    for (auto& channel : animation.channels)
     {
         AnimationSampler& sampler = animation.samplers[channel.sampler_id];
         if(sampler.inputs.size() > sampler.outputs.size())
@@ -984,7 +985,7 @@ void Model::UpdateAnimation(unsigned int animation_id, float duration)
             }
         }
     }
-
+    
     if(updated == true)
     {
         UpdateNode(0);

@@ -13,7 +13,9 @@
 #include <sstream>
 #include <string>
 
-#include <memory.h>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 
 /************************/
 /*  CLASS NAME: Shader  */
@@ -26,18 +28,12 @@ private:
     Shader& operator=(const Shader&);
 
 public:
-    Shader(const std::string&, const std::string&);
+    Shader(const std::string& vert_file, const std::string& frag_file);
     ~Shader();
 
 private:
     void init();
-    void exit();
-
-    void loadFromFile(const std::string&, char**);
-    void clearBuffer(char**);
-
-    std::string getCompileError(unsigned int shader);
-    std::string getLinkError(unsigned int program);
+    void cleanup();
 
 public:
     unsigned int get() const;

@@ -28,26 +28,28 @@
 class Model
 {
 public:
-    Model(const std::string& filename);
     Model(const std::string& directory, const std::string& filename);
     Model(const Model& other);
+    ~Model();
 
 public:
     void SetupModel();
     void CleanupModel();
-    void Update(float delta_time);
+    void Update(double delta_time);
     void Render(unsigned int shader_program);
 
 public:
     bool IsAnimated() const;
+    void ChangeAnimation(int num);
 
 private:
     void LoadModel(const std::string& file);
     orca::mat4<float> GetNodeMatrix(int node_id);
-    void UpdateAnimation(unsigned int animation_id, float duration);
+    void UpdateAnimation(double duration);
     void UpdateNode(int node_id);
 
 private:
+    size_t curr_animation;
     std::string directory;
     std::string filename;
     std::map<int, Mesh> meshes;

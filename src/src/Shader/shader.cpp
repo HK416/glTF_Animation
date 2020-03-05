@@ -7,7 +7,18 @@
 /*  INCLUDES  */
 /**************/
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
+/*************************/
+/*  FUNCTION PROTOTYPES  */
+/*************************/
+void loadFromFile(const std::string&, char**);
+void clearBuffer(char**);
+
+std::string getCompileError(unsigned int);
+std::string getLinkError(unsigned int);
+
+// constructor 
 Shader::Shader(const std::string& vert_file, const std::string& frag_file)
     : program_id(static_cast<unsigned int>(-1))
     , vert_file(vert_file)
@@ -16,11 +27,13 @@ Shader::Shader(const std::string& vert_file, const std::string& frag_file)
     init();
 }
 
+// destructor
 Shader::~Shader()
 {
-    exit();
+    cleanup();
 }
 
+// function to create shader program
 void Shader::init()
 {
     unsigned int vertex_shader = static_cast<unsigned int>(-1);
@@ -28,7 +41,7 @@ void Shader::init()
     char* buffer = nullptr;
     int status = GL_FALSE;
 
-    /* create vertex shader */
+    // create vertex shader
     loadFromFile(vert_file, &buffer);
     {
         vertex_shader = glCreateShader(GL_VERTEX_SHADER);
@@ -41,7 +54,7 @@ void Shader::init()
     }
     clearBuffer(&buffer);
 
-    /* create fragment shader */
+    // create fragment shader
     loadFromFile(frag_file, &buffer);
     {
         fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -54,25 +67,29 @@ void Shader::init()
     }
     clearBuffer(&buffer);
 
+    // create shader program
     program_id = glCreateProgram();
     glAttachShader(program_id, vertex_shader);
     glAttachShader(program_id, fragment_shader);
-
     glLinkProgram(program_id);
+
     glGetProgramiv(program_id, GL_LINK_STATUS, &status);
     if (status == GL_FALSE)
         throw std::runtime_error(getLinkError(program_id));
 
-    glDeleteShader(fragment_shader);
+    // clean up vertex shader and fragment shader
     glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
 }
 
-void Shader::exit()
+// function to clean up shader program
+void Shader::cleanup()
 {
     glDeleteProgram(program_id);
 }
 
-void Shader::loadFromFile(const std::string& filename, char** buffer)
+// function to read file
+void loadFromFile(const std::string& filename, char** buffer)
 {
     std::ifstream file(filename);
     if (file.is_open() == false)
@@ -84,12 +101,13 @@ void Shader::loadFromFile(const std::string& filename, char** buffer)
 
     (*buffer) = new char[buffer_size + 1];
     memset((*buffer), 0, sizeof(char) * (buffer_size + 1));
-
+    
     file.read(&(*buffer)[0], static_cast<std::streamsize>(buffer_size));
     file.close();
 }
 
-void Shader::clearBuffer(char** buffer)
+// function to clear buffer
+void clearBuffer(char** buffer)
 {
     if ((*buffer))
     {
@@ -98,26 +116,28 @@ void Shader::clearBuffer(char** buffer)
     }
 }
 
-std::string Shader::getCompileError(unsigned int shader)
+// funtion that return compile error message
+std::string getCompileError(unsigned int shader)
 {
-    std::string temp = "";
+    std::string msg = "";
     int length = 0;
 
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-    temp.resize(length);
+    msg.resize(static_cast<size_t>(length));
 
-    glGetShaderInfoLog(shader, length, &length, &temp[0]);
-    return temp;
+    glGetShaderInfoLog(shader, length, &length, &msg[0]);
+    return msg;
 }
 
-std::string Shader::getLinkError(unsigned int program)
+// function that return link error message
+std::string getLinkError(unsigned int program)
 {
-    std::string temp = "";
+    std::string msg = "";
     int length = 0;
 
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
-    temp.resize(length);
+    msg.resize(static_cast<size_t>(length));
 
-    glGetProgramInfoLog(program, length, &length, &temp[0]);
-    return temp;
+    glGetProgramInfoLog(program, length, &length, &msg[0]);
+    return msg;
 }

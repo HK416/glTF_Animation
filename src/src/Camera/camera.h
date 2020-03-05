@@ -8,66 +8,28 @@
 /*  INCLUDES  */
 /**************/
 #include <vector.hpp>
+#include <vector_functions.hpp>
 #include <matrix.hpp>
+#include <matrix_functions.hpp>
+#include <quaternion.hpp>
+#include <quaternion_functions.hpp>
 
-/*************************************/
-/*  ENUM CLASS NAME: CameraMovement  */
-/*************************************/
-enum class CameraMovement
+/*************************/
+/*  STRUCT NAME: Camera  */
+/*************************/
+struct Camera
 {
-    FORWARD,
-    BACKWARD,
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN
-}; // enum class CameraMovement
+    orca::mat4f getProjectionMatrix(int width, int height) const;
+    orca::mat4f getViewMatrix() const;
 
-/**********************************/
-/*  ENUM CLASS NAME: CameraSpeed  */
-/**********************************/
-enum class Speed
-{
-    SPEED_DOWN = -1,
-    SPEED_UP = 1
-}; // enum class CameraSpeed
+    orca::vec3f pos = orca::vec3f(0, 0, 0);
+    orca::vec3f dir = orca::vec3f(0, 0, 1);
+    orca::vec3f up = orca::vec3f(0, 1, 0);
 
-/************************/
-/*  CLASS NAME: Camera  */
-/************************/
-class Camera
-{
-private:
-    inline static constexpr float mouse_sensitivity = 0.1f;
-
-public:
-    Camera();
-    Camera(const Camera& other);
-
-public:
-    int GetScreenWidth() const;
-    int GetScreenHeight() const;
-    orca::mat4<float> GetViewMatrix() const;
-    orca::mat4<float> GetProjectionMatrix() const;
-    void ScreenResize(int width, int height);
-    void MouseScroll(float x_offset, float y_offset);
-    void MouseMovement(float x_offset, float y_offset);
-    void CameraTranslation(CameraMovement movement, float delta_time);
-    void CameraSpeed(Speed speed);
-
-private:
-    orca::vec3<float> position;
-    orca::vec3<float> direction;
-    orca::vec3<float> up;
-
-    float yaw;
-    float pitch;
-    float roll;
-
-    int screen_width;
-    int screen_height;
-    float fovy;
-
-    float camera_speed;
-}; // class Camera
+    double yaw = 0.0;
+    double pitch = 0.0;
+    double roll = 0.0;
+    double fovy = 45.0;
+    double speed = 1.0;
+}; // struct Camera
 #endif // !_CAMERA_H_
