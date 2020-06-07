@@ -181,8 +181,8 @@ Mesh LoadglTFMesh(const tinygltf::Model& gltf_model, const tinygltf::Mesh& gltf_
                             {
                                 auto face = mesh.indices[i];
                                 mesh.vertices[i].position.x = *(reinterpret_cast<const double*>(data_address + 0 *sizeof(double) + face * byte_stride));
-                                mesh.vertices[i].position.y = *(reinterpret_cast<const double*>(data_address + 0 *sizeof(double) + face * byte_stride));
-                                mesh.vertices[i].position.z = *(reinterpret_cast<const double*>(data_address + 0 *sizeof(double) + face * byte_stride));
+                                mesh.vertices[i].position.y = *(reinterpret_cast<const double*>(data_address + 1 *sizeof(double) + face * byte_stride));
+                                mesh.vertices[i].position.z = *(reinterpret_cast<const double*>(data_address + 2 *sizeof(double) + face * byte_stride));
                             }
                         }
                         else { throw std::runtime_error("Undefined \'POSITION\' attribute component type."); }
