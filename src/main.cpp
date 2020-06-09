@@ -50,17 +50,10 @@
 /***************/
 /*  CONSTANTS  */
 /***************/
-#ifdef _WIN32
-constexpr char* ANIM_VERT_SHADER = "\\GLSL\\anim_vert.glsl";
-constexpr char* DEF_VERT_SHADER = "\\GLSL\\def_vert.glsl";
-constexpr char* ANIM_FRAG_SHADER = "\\GLSL\\anim_frag.glsl";
-constexpr char* DEF_FRAG_SHADER = "\\GLSL\\def_frag.glsl";
-#else
-constexpr char* ANIM_VERT_SHADER = "/GLSL/vert_animation.glsl";
-constexpr char* DEF_VERT_SHADER = "/GLSL/vert_default.glsl";
-constexpr char* ANIM_FRAG_SHADER = "/GLSL/frag.glsl";
-constexpr char* DEF_FRAG_SHADER = "/GLSL/frag.glsl";
-#endif
+constexpr char* ANIM_VERT_SHADER = "/GLSL/anim_vert.glsl";
+constexpr char* ANIM_FRAG_SHADER = "/GLSL/anim_frag.glsl";
+constexpr char* DEF_VERT_SHADER = "/GLSL/def_vert.glsl";
+constexpr char* DEF_FRAG_SHADER = "/GLSL/def_frag.glsl";
 constexpr char* TITLE = "glTF Animation Application";
 constexpr int WIDTH = 1280;
 constexpr int HEIGHT = 720;
