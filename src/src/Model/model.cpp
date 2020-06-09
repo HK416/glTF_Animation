@@ -181,8 +181,8 @@ Mesh LoadglTFMesh(const tinygltf::Model& gltf_model, const tinygltf::Mesh& gltf_
                             {
                                 auto face = mesh.indices[i];
                                 mesh.vertices[i].position.x = *(reinterpret_cast<const double*>(data_address + 0 *sizeof(double) + face * byte_stride));
-                                mesh.vertices[i].position.y = *(reinterpret_cast<const double*>(data_address + 0 *sizeof(double) + face * byte_stride));
-                                mesh.vertices[i].position.z = *(reinterpret_cast<const double*>(data_address + 0 *sizeof(double) + face * byte_stride));
+                                mesh.vertices[i].position.y = *(reinterpret_cast<const double*>(data_address + 1 *sizeof(double) + face * byte_stride));
+                                mesh.vertices[i].position.z = *(reinterpret_cast<const double*>(data_address + 2 *sizeof(double) + face * byte_stride));
                             }
                         }
                         else { throw std::runtime_error("Undefined \'POSITION\' attribute component type."); }
@@ -537,6 +537,28 @@ Animation LoadglTFAnimation(const tinygltf::Model& gltf_model, const tinygltf::A
                         double z = *(reinterpret_cast<const double*>(data_address + 2 * sizeof(double) + i * byte_stride));
                         double w = *(reinterpret_cast<const double*>(data_address + 3 * sizeof(double) + i * byte_stride));
                         anim_sampler.outputs.emplace_back(x, y, z, w);
+                    }
+                }
+                else { throw std::runtime_error("Undefined animation sampler outputs component type."); }
+            }
+            else if(accessor.type == TINYGLTF_TYPE_SCALAR)
+            {
+                if(accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT)
+                {
+                    anim_sampler.outputs.reserve(count);
+                    for(std::size_t i = 0; i < count; ++i)
+                    {
+                        double x = *(reinterpret_cast<const float*>(data_address + i * byte_stride));
+                        anim_sampler.outputs.emplace_back(x, 0, 0, 0);
+                    }
+                }
+                else if(accessor.componentType == TINYGLTF_COMPONENT_TYPE_DOUBLE)
+                {
+                    anim_sampler.outputs.reserve(count);
+                    for(std::size_t i = 0; i < count; ++i)
+                    {
+                        double x = *(reinterpret_cast<const double*>(data_address + i * byte_stride));
+                        anim_sampler.outputs.emplace_back(x, 0, 0, 0);
                     }
                 }
                 else { throw std::runtime_error("Undefined animation sampler outputs component type."); }
